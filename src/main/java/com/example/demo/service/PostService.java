@@ -4,6 +4,7 @@ import com.example.demo.domain.Post;
 import com.example.demo.dto.PostRequest;
 import com.example.demo.dto.PostResponse;
 import com.example.demo.dto.UpdateRequest;
+import com.example.demo.repository.PostRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -23,47 +24,45 @@ public class PostService {
 
     private final ObjectMapper objectMapper;
 
+    private final PostRepository postRepository;
+
     @SneakyThrows
     public void create(PostRequest request) {
         Post post = request.toEntity();
         String key = UUID.randomUUID().toString();
         post.setId(key);
-        post.setCreate_time(System.currentTimeMillis());
-
-        String postJson = objectMapper.writeValueAsString(post);
-
-        redisTemplate.opsForValue().set(key,postJson);
-        redisTemplate.expire(key,3600, TimeUnit.SECONDS);
+        postRepository.save(post);
 
     }
 
     @SneakyThrows
     public PostResponse read(String id) {
-        String postJson = redisTemplate.opsForValue().get(id);
-        PostResponse response = objectMapper.readValue(postJson, PostResponse.class);
+        PostResponse response;
+        if(redisTemplate.hasKey(id)){
+            String jsonString = redisTemplate.opsForValue().get(id);
+            response = objectMapper.readValue(jsonString,PostResponse.class);
+        }
+        else {
+            Post post = postRepository.findById(id).get();
+            redisTemplate.opsForValue().set(id,objectMapper.writeValueAsString(post));
+            redisTemplate.expire(id,180,TimeUnit.SECONDS);
+            response = new PostResponse(post);
+        }
         return response;
     }
 
     @SneakyThrows
     @Transactional
     public PostResponse update(String id, UpdateRequest updateRequest) {
-        String postJson = redisTemplate.opsForValue().get(id);
-
-        Post post = objectMapper.readValue(postJson, Post.class);
+        Post post = postRepository.findById(id).get();
         post.setTitle(updateRequest.getTitle());
         post.setBody(updateRequest.getBody());
-
-        postJson = objectMapper.writeValueAsString(post);
-        redisTemplate.opsForValue().set(post.getId(),postJson);
-
-        redisTemplate.expire(post.getId(),3600, TimeUnit.SECONDS);
-
         PostResponse response = new PostResponse(post);
         return response;
     }
 
     @SneakyThrows
     public void delete(String id) {
-        redisTemplate.delete(id);
+        postRepository.deleteById(id);
     }
 }
