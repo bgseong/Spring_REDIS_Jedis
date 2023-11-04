@@ -21,19 +21,19 @@ public class PostController {
     }
 
     @GetMapping(value = "api/test/post/{id}")
-    public ResponseEntity<PostResponse> read (@PathVariable("id") Long id){
+    public ResponseEntity<PostResponse> read (@PathVariable("id") String id){
         PostResponse response = postService.read(id);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping(value = "api/test/post/{id}")
-    public ResponseEntity<PostResponse> update(@RequestBody UpdateRequest updateRequest, @PathVariable("id") Long id){
+    public ResponseEntity<PostResponse> update(@RequestBody UpdateRequest updateRequest, @PathVariable("id") String id){
         PostResponse response = postService.update(id,updateRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping(value = "api/test/post/{id}")
-    public ResponseEntity<String> create(@PathVariable("id") Long id){
+    public ResponseEntity<String> create(@PathVariable("id") String id){
         postService.delete(id);
         return new ResponseEntity<>("삭제 성공", HttpStatus.OK);
     }

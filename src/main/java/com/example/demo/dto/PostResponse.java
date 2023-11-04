@@ -4,11 +4,12 @@ import com.example.demo.domain.Post;
 import lombok.*;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class PostResponse {
-    private Long id;
+    private String id;
 
     private String title;
 
