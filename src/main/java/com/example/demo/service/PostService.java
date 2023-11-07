@@ -31,8 +31,10 @@ public class PostService {
         Post post = request.toEntity();
         String key = UUID.randomUUID().toString();
         post.setId(key);
-        postRepository.save(post);
+        Post savedPost = postRepository.save(post);
 
+        redisTemplate.opsForValue().set(key,objectMapper.writeValueAsString(savedPost));
+        redisTemplate.expire(key,180,TimeUnit.SECONDS);
     }
 
     @SneakyThrows

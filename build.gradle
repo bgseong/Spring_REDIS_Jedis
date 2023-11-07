@@ -24,7 +24,12 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation('org.springframework.session:spring-session-data-redis')
+	implementation group: 'redis.clients', name: 'jedis'
+	implementation group: 'org.apache.commons', name: 'commons-pool2'
+	implementation ('org.springframework.boot:spring-boot-starter-data-redis') {
+		exclude group: 'io.lettuce.core', module: 'lettuce-core'
+	}
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
